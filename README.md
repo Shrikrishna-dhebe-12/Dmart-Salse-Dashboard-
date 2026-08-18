@@ -175,7 +175,7 @@ Dmart-Sales-Dashboard/
 
 **Shrikrushna Dhebe**
 
-Data Analyst | Python | SQL | Power BI
+Data Analyst | Python | SQL | Power BI | MLOPS | Data Science 
 
 ---
 
