@@ -1,32 +1,67 @@
 import pandas as pd
 
-# 1. Read raw Excel file
 df = pd.read_excel("dmart_dataset.xlsx")
 
-# 2. Handle Missing Values (Discount रिकामं असेल तर 0 fill कर)
-df['Discount'] = df['Discount'].fillna(0)
+df["Discount"] = (
+    pd.to_numeric(df["Discount"], errors="coerce")
+    .fillna(0)
+)
 
-# 3. Correct Data Types
-# Quantity मध्ये text values → numeric
-df['Quantity'] = df['Quantity'].replace({'two': 2})
-df['Quantity'] = pd.to_numeric(df['Quantity'], errors='coerce')
+df["Quantity"] = (
+    df["Quantity"]
+    .replace({"two": 2, "Three": 3, "three": 3})
+)
 
-# Date ला proper datetime format मध्ये convert कर
-df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
+df["Quantity"] = pd.to_numeric(
+    df["Quantity"],
+    errors="coerce"
+)
 
-# 4. Standardization (spaces काढ, case uniform कर)
-df['Store_Location'] = df['Store_Location'].str.strip().str.title()
-df['Product_Category'] = df['Product_Category'].str.strip().str.title()
-df['Product_Name'] = df['Product_Name'].str.strip().str.title()
-df['Payment_Method'] = df['Payment_Method'].str.strip().str.title()
+df["Unit_Price"] = pd.to_numeric(
+    df["Unit_Price"],
+    errors="coerce"
+)
 
-# 5. Outlier Handling (Discount > Gross Sales असेल तर cap करायचं नाही, फक्त flag करायचं)
-df['Discount_Flag'] = df['Discount'] > (df['Quantity'] * df['Unit_Price'])
+df["Date"] = pd.to_datetime(
+    df["Date"],
+    errors="coerce"
+)
 
-# 6. Remove Duplicates
-df = df.drop_duplicates(subset=['Invoice_ID'])
+for col in [
+    "Store_Location",
+    "Product_Category",
+    "Product_Name",
+    "Payment_Method"
+]:
+    df[col] = (
+        df[col]
+        .astype(str)
+        .str.strip()
+        .str.title()
+    )
 
-# 7. Save cleaned data to new Excel file
-df.to_excel("clean_invoice_data.xlsx", index=False)
+df["Gross_Sales"] = (
+    df["Quantity"] *
+    df["Unit_Price"]
+)
 
-print("✅ Cleaned Excel file saved as clean_invoice_data.xlsx")
+df["Discount_Flag"] = (
+    df["Discount"] >
+    df["Gross_Sales"]
+)
+
+df = (
+    df
+    .drop_duplicates(subset=["Invoice_ID"])
+    .sort_values("Date")
+    .reset_index(drop=True)
+)
+
+df.to_excel(
+    "clean_invoice_data.xlsx",
+    index=False
+)
+
+print(
+    " Cleaned Excel file saved as clean_invoice_data.xlsx"
+)
